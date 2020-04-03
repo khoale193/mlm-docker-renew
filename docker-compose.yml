@@ -1,0 +1,230 @@
+version: '3.7'
+
+services:
+
+  database:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    container_name: mysql_database
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password --sql_mode=""
+    working_dir: /app
+    tty: true
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_sto_test
+      # MYSQL_DATABASE: db_sto_test_demo
+    # volumes:
+    #   - /var/lib/mysql:/var/lib/mysql
+    #   - /etc/mysql/my.cnf:/etc/mysql/my.cnf
+    ports:
+      - "3306:3306"
+    network_mode: "host"
+
+  webserver:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: nginx_webserver
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/sites-available:/etc/nginx/sites-available
+      - ./nginx/sites-available:/etc/nginx/sites-enabled
+    network_mode: "host"
+
+  member:
+    build:
+      context: ./member/develop
+      dockerfile: Dockerfile
+    # container_name: angularjs_member
+    restart: unless-stopped
+    tty: true
+    working_dir: /app
+    # volumes:
+    # - ./member/develop/mlm-ng:/app/mlm-ng
+    ports:
+      - '3100:3100'
+      - '4200:4200'
+    network_mode: "host"
+
+  resource:
+    build:
+      context: ./resource/develop
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    tty: true
+    working_dir: /app
+    volumes:
+      - /www/uploads:/app/mlm-ng/resource-server/uploads
+    ports:
+      - '4000:4000'
+    network_mode: "host"
+
+  admin:
+    build:
+      context: ./admin/develop
+      dockerfile: Dockerfile
+    # container_name: angularjs_admin
+    restart: unless-stopped
+    tty: true
+    working_dir: /app
+    # volumes:
+    #   - ./admin/develop/mlm-ng-admin:/app/mlm-ng-admin
+    ports:
+      - '3200:3200'
+    network_mode: "host"
+
+  backend:
+    build:
+      context: ./backend/develop
+      dockerfile: Dockerfile
+    # container_name: golang_backend
+    environment:
+      - GOPATH=/app/go-space
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    working_dir: /app
+    # volumes:
+    #   - ./backend/develop/go-space:/app/go-space/
+    #   - ./backend/develop/mlm-ng-goapi:/app/go-space/src/mlm-ng-goapi
+    #   - ./backend/develop/mlm-ng-goapi:/app/go-space/src/github.com/smartblock/mlm-ng-goapi
+    ports:
+      - '8000:8000'
+    # depends_on:
+    #   - database
+    network_mode: "host"
+
+  demo-member:
+    build:
+      context: ./member/demo
+      dockerfile: Dockerfile
+    # container_name: angularjs_demo_member
+    restart: unless-stopped
+    tty: true
+    working_dir: /app
+    # volumes:
+    #   - ./member/demo/mlm-ng:/app/mlm-ng
+    ports:
+      - '3101:3101'
+      - '4201:4201'
+    network_mode: "host"
+
+  demo-resource:
+    build:
+      context: ./resource/demo
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    tty: true
+    working_dir: /app
+    volumes:
+      - /www/uploads-demo:/app/mlm-ng/resource-server/uploads
+    ports:
+      - '4001:4001'
+    network_mode: "host"
+
+  demo-admin:
+    build:
+      context: ./admin/demo
+      dockerfile: Dockerfile
+    # container_name: angularjs_demo_admin
+    restart: unless-stopped
+    tty: true
+    working_dir: /app
+    # volumes:
+    #   - ./admin/demo/mlm-ng-admin:/app/mlm-ng-admin
+    ports:
+      - '3201:3201'
+      # - '4200:4200'
+    network_mode: "host"
+
+  demo-backend:
+    build:
+      context: ./backend/demo
+      dockerfile: Dockerfile
+    # container_name: golang_demo_backend
+    environment:
+      - GOPATH=/app/go-space
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    working_dir: /app
+    # volumes:
+    #   - ./backend/demo/go-space:/app/go-space/
+    #   - ./backend/demo/mlm-ng-goapi:/app/go-space/src/mlm-ng-goapi
+    #   - ./backend/demo/mlm-ng-goapi:/app/go-space/src/github.com/smartblock/mlm-ng-goapi
+    ports:
+      - '8001:8001'
+    # depends_on:
+    #   - database
+    network_mode: "host"
+
+  vkids-member:
+    build:
+      context: ./member/vkids
+      dockerfile: Dockerfile
+    # container_name: angularjs_member
+    restart: unless-stopped
+    tty: true
+    working_dir: /app
+    # volumes:
+    # - ./member/develop/mlm-ng:/app/mlm-ng
+    ports:
+      - '3102:3102'
+      - '4202:4202'
+    network_mode: "host"
+
+  vkids-admin:
+    build:
+      context: ./admin/vkids
+      dockerfile: Dockerfile
+    # container_name: angularjs_demo_admin
+    restart: unless-stopped
+    tty: true
+    working_dir: /app
+    # volumes:
+    #   - ./admin/demo/mlm-ng-admin:/app/mlm-ng-admin
+    ports:
+      - '3202:3202'
+      # - '4200:4200'
+    network_mode: "host"
+
+  vkids-backend:
+    build:
+      context: ./backend/vkids
+      dockerfile: Dockerfile
+    # container_name: golang_demo_backend
+    environment:
+      - GOPATH=/app/go-space
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    working_dir: /app
+    # volumes:
+    #   - ./backend/demo/go-space:/app/go-space/
+    #   - ./backend/demo/mlm-ng-goapi:/app/go-space/src/mlm-ng-goapi
+    #   - ./backend/demo/mlm-ng-goapi:/app/go-space/src/github.com/smartblock/mlm-ng-goapi
+    ports:
+      - '8002:8002'
+    # depends_on:
+    #   - database
+    network_mode: "host"
+
+  vkids-resource:
+    build:
+      context: ./resource/vkids
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    tty: true
+    working_dir: /app
+    volumes:
+      - /www/uploads-vkids:/app/mlm-ng/resource-server/uploads
+    ports:
+      - '4002:4002'
+    network_mode: "host"
